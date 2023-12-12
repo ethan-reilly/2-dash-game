@@ -11,6 +11,8 @@ int main()
         float runningTime;
     };
 
+    int windowDimensions[2]{512, 380};    
+
     // Window Properties
     const int windowWidth = 512;
     const int windowHeight = 380;
@@ -34,7 +36,8 @@ int main()
     bool isInAir = false;
 
     // NOTE: InitWindow has to be called before Texture2D set up
-    InitWindow(windowWidth, windowHeight, "Dash Game");
+    //InitWindow(windowWidth, windowHeight, "Dash Game");
+    InitWindow(windowDimensions[0], windowDimensions[1], "Dash Game");
 
  Texture2D nebula = LoadTexture("textures/12_nebula_spritesheet.png");
 
@@ -48,6 +51,8 @@ int main()
     float nebRunningTime =0;
     */
 
+
+/* After struct, before for loop
     // AnimData struct for Nebula/Hazard
     AnimData nebulaData{ {0, 0, nebula.width/8.0, nebula.height/8.0}, {windowWidth,
         windowHeight-nebula.height/8.0}, 0, 1.0/16.0, 0.0 };
@@ -55,9 +60,28 @@ int main()
 // AnimData struct for 2nd Nebula/Hazard
     AnimData nebula2Data{ {0, 0, nebula.width/8.0, nebula.height/8.0}, {windowWidth + 300,
         windowHeight-nebula.height/8.0}, 0, 1.0/12.0, 0.0 };
+*/
+
+const int nebulaCount{3};
+AnimData nebulaDataArray[nebulaCount]{};
+
+for (int i = 0; i < nebulaCount; i++)
+{
+    nebulaDataArray[i].rec.x = 0.0;
+    nebulaDataArray[i].rec.y = 0.0;
+    nebulaDataArray[i].rec.width = nebula.width/8.0;
+    nebulaDataArray[i].rec.height = nebula.height/8.0;
+    nebulaDataArray[i].pos.x = windowWidth + (300 * i);
+    nebulaDataArray[i].pos.y = windowDimensions[1] - nebula.height/8.0;
+    nebulaDataArray[i].frame = 0;
+    nebulaDataArray[i].updateTime = 1.0/16.0;
+    nebulaDataArray[i].runningTime = 0.0;
+}
+
+
 
   
-//    
+//    Before Struct
 //     Vector2 nebulaPos;
 //     nebulaPos.x = windowWidth;
 //     nebulaPos.y = windowHeight - nebulaRec.height;
@@ -130,10 +154,22 @@ int main()
                 velocity += jumpHeight;
             }
             
+            // Before for loop
+            // nebulaDataArray[0].pos.x += nebulaVel * dT;
+            // nebulaDataArray[1].pos.x += nebulaVel * dT;
+
+            for (int i = 0; i < nebulaCount; i++)
+            {
+                   nebulaDataArray[i].pos.x += nebulaVel * dT;
+            }
+                
+
+            /* Before Array
             // Nebula/Hazard update
             //nebulaPos.x += nebulaVel * dT;
             nebulaData.pos.x += nebulaVel * dT;
             nebula2Data.pos.x += nebulaVel * dT;
+            */
 
             // Scarfy jump - Update Scarfy pos
             //scarfyPos.y += velocity * dT;
@@ -173,39 +209,67 @@ int main()
             //     }
             // }
 
-            if(nebulaData.runningTime >= nebulaData.updateTime)
-            {
-                nebulaData.runningTime = 0.0;
-                // Update hazard animation frame
-                nebulaData.rec.x = nebulaData.frame * nebulaData.rec.width;
-                nebulaData.frame++;
-                if (nebulaData.frame > 8)
+
+             for (int i = 0; i < nebulaCount; i++)
+             {
+                nebulaDataArray[i].runningTime += dT;
+
+                if(nebulaDataArray[i].runningTime >= nebulaDataArray[i].updateTime)
                 {
-                    nebulaData.frame = 0;
+                    nebulaDataArray[i].runningTime = 0.0;
+                    // Update hazard animation frame
+                    nebulaDataArray[i].rec.x = nebulaDataArray[i].frame * nebulaDataArray[i].rec.width;
+                    nebulaDataArray[i].frame++;
+                    if (nebulaDataArray[i].frame > 8)
+                    {
+                        nebulaDataArray[i].frame = 0;
+                    }
+              }
+                
+             }
+
+
+           /* //Before for loop
+            if(nebulaDataArray[0].runningTime >= nebulaDataArray[0].updateTime)
+            {
+                nebulaDataArray[0].runningTime = 0.0;
+                // Update hazard animation frame
+                nebulaDataArray[0].rec.x = nebulaDataArray[0].frame * nebulaDataArray[0].rec.width;
+                nebulaDataArray[0].frame++;
+                if (nebulaDataArray[0].frame > 8)
+                {
+                    nebulaDataArray[0].frame = 0;
                 }
             }
             
-            if(nebula2Data.runningTime >= nebula2Data.updateTime)
+            if(nebulaDataArray[1].runningTime >= nebulaDataArray[1].updateTime)
             {
-                nebula2Data.runningTime = 0.0;
+                nebulaDataArray[1].runningTime = 0.0;
                 // Update hazard animation frame
-                nebula2Data.rec.x = nebula2Data.frame * nebula2Data.rec.width;
-                nebula2Data.frame++;
-                if (nebula2Data.frame > 8)
+                nebulaDataArray[1].rec.x = nebulaDataArray[1].frame * nebulaDataArray[1].rec.width;
+                nebulaDataArray[1].frame++;
+                if (nebulaDataArray[1].frame > 8)
                 {
-                    nebula2Data.frame = 0;
+                    nebulaDataArray[1].frame = 0;
                 }
             }
+            */
 
             //Draw Nebula
            // DrawTextureRec(nebula, nebulaRec, nebulaPos, WHITE);
 
+            /* Before for loop
            // DrawTextureRec(nebula, nebulaRec, nebulaPos, WHITE);
-            DrawTextureRec(nebula, nebulaData.rec, nebulaData.pos, WHITE);
-            
-            
+            DrawTextureRec(nebula, nebulaDataArray[0].rec, nebulaDataArray[0].pos, WHITE);
            // DrawTextureRec(nebula, nebulaRec, nebulaPos, WHITE);
-            DrawTextureRec(nebula, nebula2Data.rec, nebula2Data.pos, WHITE);
+            DrawTextureRec(nebula, nebulaDataArray[1].rec, nebulaDataArray[1].pos, WHITE);
+            */
+
+            for (int i = 0; i < nebulaCount; i++)
+            {
+                DrawTextureRec(nebula, nebulaDataArray[i].rec, nebulaDataArray[i].pos, WHITE);
+            }
+            
   
             // Draw Scarfy
             //DrawTextureRec(scarfy, scarfyRec, scarfyPos, WHITE);
